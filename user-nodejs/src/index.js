@@ -3,6 +3,10 @@ var cors = require('cors');
 var helmet = require('helmet');
 var bodyParser = require('body-parser');
 
+var mongoose = require('mongoose');
+
+const User = require('../models/User');
+
 var app = express();
 
 app.use(helmet());
@@ -10,8 +14,27 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/', (req,res) => {
-	res.send('User');
+mongoose
+    .connect("mongodb://localhost:27017/test", { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log("mongoDB connected"))
+    .catch(err => console.log(err));
+
+app.get('/', (req, res) => {
+    res.send("USER");
+})
+
+app.post('/', (req,res) => {    
+    const newUser = new User({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password
+    })
+
+    newUser.save()
+        .then(user => res.json(user))
+        .catch(err => {
+            console.log(err);
+        })
 });
 
 app.get('/signout', (req, res) => {
